@@ -1,0 +1,81 @@
+msgthr - non-recursive, container-agnostic message threading
+------------------------------------------------------------
+
+Message threading based on the algorithm described by JWZ in
+<https://www.jwz.org/doc/threading.html> and used in
+countless mail and news readers; but with some features
+removed and improved flexibility:
+
+* No pruning of non-leaf ghosts.  Readers are not shielded
+  from deleted or lost messages.  Equivalent to setting
+  "hide_missing" to "no" in mutt.
+
+* No grouping by subject.  This makes things ideal for short
+  messages such as chat and status updates.  For email, this
+  encourages the use of proper client which set In-Reply-To
+  or References headers.  Equivalent to setting
+  "strict_threads" to "yes" in mutt.
+
+* No recursion; all algorithms are non-recursive to avoid
+  SystemStackError exceptions in deep threads.
+  Memory usage is bound by the number of lightweight containers
+  needed to represent a thread.
+
+* Message format-agnostic, not limited to email or NNTP;
+  but even appropriate for forums, blog comments, IM, etc.
+  For mail and NNTP messages, that means you must extract
+  the Message-ID and parse the References and In-Reply-To
+  headers into an array yourself.
+
+Source code
+-----------
+
+	git clone git://80x24.org/msgthr
+
+Contact
+-------
+
+Feedback is welcome via plain-text mail (no HTML, images, etc).
+Please send comments, user/dev discussion, patches, bug reports,
+and pull requests to the open-to-all mailing list at:
+
+	msgthr-public@80x24.org
+
+No subscription will ever be required to post.  Please Cc: all
+recipients as subscription is not necessary.
+
+Mailing list archives via HTTPS: https://80x24.org/msgthr-public/
+Or NNTP: nntp://news.public-inbox.org/inbox.comp.lang.ruby.msgthr
+
+You may optionally subscribe, but will never be required to:
+
+	msgthr-public+subscribe@80x24.org
+
+This README is our homepage, we would rather be working on cool
+stuff day than worrying about the next browser vulnerability
+because HTML/CSS/JS/images are too complicated for us.
+
+* https://80x24.org/msgthr/README
+
+Copyright
+---------
+
+Copyright 2016, all contributors (see git repo).
+License: GPL-2.0+ <https://www.gnu.org/licenses/gpl-2.0.txt>
+
+msgthr is copyrighted Free Software by all contributors, see logs in
+revision control for names and email addresses of all of them.
+
+msgthr is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of
+the License, or (at your option) any later version.
+
+msgthr is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, see
+https://www.gnu.org/licenses/gpl-2.0.txt
