@@ -12,7 +12,7 @@ class TestMsgthr < Test::Unit::TestCase
     thr.add('D', nil, 'D')
     thr.add('d', nil, 'd')
     thr.thread!
-    rootset = thr.order! { |c| c.sort! { |a, b| a.mid <=> b.mid } }
+    rootset = thr.order! { |c| c.sort_by!(&:mid) }
     assert_equal %w(D c d), rootset.map(&:mid)
     assert_equal 'D', rootset[0].msg
     assert_equal %w(b), rootset[1].children.map(&:mid)
