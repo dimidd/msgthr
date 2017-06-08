@@ -4,7 +4,7 @@ all::
 pkg = msgthr
 RUBY = ruby
 lib := lib
-VERSION := 0.0.0
+VERSION := 1.0.0
 
 all:: test
 test_units := $(wildcard test/test_*.rb)
