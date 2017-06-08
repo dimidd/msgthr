@@ -4,7 +4,7 @@
 Gem::Specification.new do |s|
   manifest = File.read('.manifest').split(/\n/)
   s.name = %q{msgthr}
-  s.version = ENV['VERSION'] || '1.0.0'
+  s.version = ENV['VERSION'] || '1.0.1'
   s.authors = ['msgthr hackers']
   s.summary = 'container-agnostic, non-recursive message threading'
   s.description = File.read('README').split(/\n\n/)[1].strip

@@ -4,7 +4,7 @@ all::
 pkg = msgthr
 RUBY = ruby
 lib := lib
-VERSION := 1.0.0
+VERSION := 1.0.1
 RSYNC_DEST := 80x24.org:/srv/80x24/msgthr/
 
 RSYNC = rsync
