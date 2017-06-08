@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name = %q{msgthr}
   s.version = ENV['VERSION'] || '0.0.0'
   s.authors = ['msgthr hackers']
-  s.summary = 'non-recursive, container-agnostic message threading'
+  s.summary = 'container-agnostic, non-recursive message threading'
   s.description = File.read('README').split(/\n\n/)[1].strip
   s.email = %q{msgthr-public@80x24.org}
   s.homepage = 'https://80x24.org/msgthr/'

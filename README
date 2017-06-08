@@ -1,25 +1,10 @@
-msgthr - non-recursive, container-agnostic message threading
+msgthr - container-agnostic, non-recursive message threading
 ------------------------------------------------------------
 
-Message threading based on the algorithm described by JWZ in
-<https://www.jwz.org/doc/threading.html> and used in
-countless mail and news readers; but with some features
-removed and improved flexibility:
-
-* No pruning of non-leaf ghosts.  Readers are not shielded
-  from deleted or lost messages.  Equivalent to setting
-  "hide_missing" to "no" in mutt.
-
-* No grouping by subject.  This makes things ideal for short
-  messages such as chat and status updates.  For email, this
-  encourages the use of proper client which set In-Reply-To
-  or References headers.  Equivalent to setting
-  "strict_threads" to "yes" in mutt.
-
-* No recursion; all algorithms are non-recursive to avoid
-  SystemStackError exceptions in deep threads.
-  Memory usage is bound by the number of lightweight containers
-  needed to represent a thread.
+Pure Ruby message threading based on the algorithm described by
+JWZ in <https://www.jwz.org/doc/threading.html> and used in
+countless mail and news readers; but with some features removed
+and improved flexibility:
 
 * Message format-agnostic, not limited to email or NNTP;
   but even appropriate for forums, blog comments, IM, etc.
@@ -27,10 +12,42 @@ removed and improved flexibility:
   the Message-ID and parse the References and In-Reply-To
   headers into an array yourself.
 
+* No recursion; all algorithms are non-recursive to avoid
+  SystemStackError exceptions in deep message threads.
+  Memory usage is bound by the number of lightweight containers
+  needed to represent a thread.
+
+* No pruning of non-leaf ghosts.  Readers are not shielded
+  from deleted or lost messages.  Equivalent to setting
+  "hide_missing" to "no" in mutt.
+
+* No grouping by subject[1].  This makes things ideal for short
+  messages such as chat and status updates.  For email, this
+  encourages the use of proper client which set In-Reply-To
+  or References headers.  Equivalent to setting "strict_threads"
+  to "yes" in mutt.
+
+  [1] - Instead, messages with the same Subject can be grouped
+        by a search engine.  For email, this would be done using
+        a mail search engine like notmuch or mairix.
+
 Source code
 -----------
 
+Our Ruby 1.9.3+ compatible code is available via git,
+no C compiler or other dependencies are required:
+
 	git clone git://80x24.org/msgthr
+	git clone https://80x24.org/msgthr.git
+
+Releases may be downloaded via RubyGems:
+
+	gem fetch [-v VERSION] msgthr
+
+The code used in this Ruby library was originally derived from
+the Mail::Thread module for Perl 5.x:
+
+	https://metacpan.org/release/Mail-Thread
 
 Contact
 -------
@@ -42,10 +59,12 @@ and pull requests to the open-to-all mailing list at:
 	msgthr-public@80x24.org
 
 No subscription will ever be required to post.  Please Cc: all
-recipients as subscription is not necessary.
+recipients as subscription will never be necessary.
 
-Mailing list archives via HTTPS: https://80x24.org/msgthr-public/
-Or NNTP: nntp://news.public-inbox.org/inbox.comp.lang.ruby.msgthr
+Mailing list archives are available via HTTPS and NNTP:
+
+	https://80x24.org/msgthr-public/
+	nntp://news.public-inbox.org/inbox.comp.lang.ruby.msgthr
 
 You may optionally subscribe, but will never be required to:
 
@@ -53,14 +72,16 @@ You may optionally subscribe, but will never be required to:
 
 This README is our homepage, we would rather be working on cool
 stuff day than worrying about the next browser vulnerability
-because HTML/CSS/JS/images are too complicated for us.
+because CSS/JS/images are all too complicated for us.
 
-* https://80x24.org/msgthr/README
+RDoc API documentation in simple HTML is available at:
+
+	https://80x24.org/msgthr/rdoc/
 
 Copyright
 ---------
 
-Copyright 2016, all contributors (see git repo).
+Copyright 2016-2017, all contributors (see git repo).
 License: GPL-2.0+ <https://www.gnu.org/licenses/gpl-2.0.txt>
 
 msgthr is copyrighted Free Software by all contributors, see logs in
