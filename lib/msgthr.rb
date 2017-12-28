@@ -7,8 +7,7 @@
 #
 # * use Msgthr.new to create a new object
 # * use Msgthr#add! for every message you have
-# * use Msgthr#thread! to perform threading operations
-# * optionally, use Msgthr#order! to sort messages
+# * use Msgthr#thread! to perform threading and (optionally) sort
 # * use Msgthr#walk_thread to iterate through the threaded tree
 #
 # See https://80x24.org/msgthr/README for more info
@@ -20,43 +19,39 @@ class Msgthr
   # calling Msgthr#thread!
   attr_reader :rootset
 
+  # raised when methods are called in an unsupported order
+  StateError = Class.new(RuntimeError)
+
   # Initialize a Msgthr object
   def initialize
     @id_table = {}
     @rootset = []
+    @state = :init # :init => :threaded => :ordered
   end
 
   # Clear internal data structures to save memory and prepare for reuse
   def clear
     @rootset.clear
     @id_table.clear
+    @state = :init
   end
 
   # Performs threading on the messages and returns the rootset
   # (set of message containers without parents).
   #
-  # Call this after all #add operations are complete.
-  # This does not sort, use #order! if sorting is necessary.
-  def thread!
-    ret = @rootset
-    @id_table.each_value { |cont| ret << cont if cont.parent.nil? }.clear
-    ret
-  end
-
-  # Performs an in-place sort on messages after thread!
-  # This is optional and intended to be called this only after #thread!
+  # Call this only after all #add operations are complete.
   #
-  # This takes a block which yields an array of Msgthr::Container
-  # objects for sorting.
+  # If given an optional block, it will perform an in-place sort
+  # using the block parameter.
   #
-  # To sort by unique +mid+ identifiers for each container:
+  # To thread and sort by unique +mid+ identifiers for each container:
   #
-  #   msgthr.order! { |ary| ary.sort_by!(&:mid) }
+  #   msgthr.thread! { |ary| ary.sort_by!(&:mid) }
   #
   # If your opaque message pointer contains a +time+ accessor which gives
   # a Time object:
   #
-  #   msgthr.order! do |ary|
+  #   msgthr.thread! do |ary|
   #     ary.sort_by! do |cont| # Msgthr::Container
   #       cur = cont.topmost
   #       cur ? cur.msg.time : Time.at(0)
@@ -67,16 +62,40 @@ class Msgthr
   # Msgthr::Container#mid, as any known missing messages (ghosts)
   # will still have a +mid+.  However, Msgthr::Container#topmost is
   # necessary if accessing Msgthr::Container#msg.
+  def thread!
+    raise StateError, "already #@state" if @state != :init
+    ret = @rootset
+    @id_table.each_value { |cont| ret << cont if cont.parent.nil? }.clear
+    @state = :threaded
+    order! { |ary| yield(ary) } if block_given?
+    ret
+  end
+
+  # Calling this method is unnecessary since msgthr 1.1.0.
+  # In previous releases, the #thread! did not support a block
+  # parameter for ordering.  This method remains for compatibility.
   def order!
+    case @state
+    when :init then raise StateError, "#thread! not called"
+    when :ordered then raise StateError, "already #@state"
+    # else @state == :threaded
+    end
+
     yield @rootset
     @rootset.each do |cont|
       # this calls Msgthr::Container#order!, which is non-recursive
       cont.order! { |children| yield(children) }
     end
+    @state = :ordered
+    @rootset
   end
 
   # non-recursively walk a set of messages after #thread!
-  # (and optionally, #order!)
+  # (and optionally, #order!).
+  #
+  # If you do not care about ordering, you may call this
+  # immediately after all #add operations are complete starting
+  # with msgthr 1.1.0
   #
   # This takes a block and yields 3 elements to it: +|level, container, index|+
   # for each message container.
@@ -95,6 +114,8 @@ class Msgthr
   #     printf("#{indent} % 3d. %s\n", index, subject)
   #   end
   def walk_thread
+    thread! if @state == :init
+    order! { |_| } if @state == :threaded
     i = -1
     q = @rootset.map { |cont| [ 0, cont, i += 1 ] }
     while tmp = q.shift
@@ -128,6 +149,8 @@ class Msgthr
   # calling this method to avoid wasting memory on hash keys.  Likewise
   # is true for any String objects in +refs+.
   def add(mid, refs, msg)
+    @state == :init or raise StateError, "cannot add when already #@state"
+
     cur = @id_table[mid] ||= Msgthr::Container.new(mid)
     cur.msg = msg
     refs or return

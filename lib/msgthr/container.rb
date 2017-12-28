@@ -1,9 +1,9 @@
 # Copyright (C) 2016 all contributors <msgthr-public@80x24.org>
 # License: GPL-2.0+ <https://www.gnu.org/licenses/gpl-2.0.txt>
 
-# An internal container class, this is exposed for Msgthr#order!
-# and Msgthr#walk_thread APIs.  They should should not be initialized
-# in your own code.
+# An internal container class, this is exposed for Msgthr#thread!
+# Msgthr#order! and Msgthr#walk_thread APIs through block parameters.
+# They should should not be initialized in your own code.
 #
 # One container object will exist for every message you call Msgthr#add! on,
 # so there can potentially be many of these objects for large sets of
