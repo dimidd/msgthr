@@ -14,4 +14,12 @@ Gem::Specification.new do |s|
   s.files = manifest
   s.licenses = 'GPL-2.0+'
   s.required_ruby_version = '>= 1.9.3'
+
+  if s.respond_to?(:metadata=)
+    s.metadata = {
+      'source_code_uri' => 'https://80x24.org/msgthr.git',
+      'mailing_list_uri' => 'https://80x24.org/msgthr-public/',
+      'bug_tracker_uri' => 'https://80x24.org/msgthr-public/',
+    }
+  end
 end
