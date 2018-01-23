@@ -6,8 +6,15 @@ require 'msgthr'
 class TestMsgthr < Test::Unit::TestCase
   def test_msgthr
     thr = Msgthr.new
+    parent_child = ''
+    # Note that C is added after B,
+    # hence it's message will be empty after adding B
+    expected_parent_child = '->B'
     thr.add('a', %w(c b), 'abc')
-    thr.add('b', %w(c), 'B')
+    thr.add('b', %w(c), 'B') do |parent, child|
+      parent_child = "#{parent.msg}->#{child.msg}"
+    end
+    assert_equal parent_child, expected_parent_child
     thr.add('c', nil, 'c')
     thr.add('D', nil, 'D')
     thr.add('d', %w(missing), 'd')

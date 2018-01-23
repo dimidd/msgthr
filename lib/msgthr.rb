@@ -166,12 +166,16 @@ class Msgthr
       # but do not change existing links or loop
       if prev && !cont.parent && !cont.has_descendent(prev)
         prev.add_child(cont)
+        yield(prev, cont) if block_given?
       end
       prev = cont
     end
 
     # set parent of this message to be the last element in refs
-    prev.add_child(cur) if prev
+    if prev
+      prev.add_child(cur)
+      yield(prev, cur) if block_given?
+    end
   end
 end
 
