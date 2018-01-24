@@ -148,7 +148,18 @@ class Msgthr
   # If +mid+ is a String, it is recommended to freeze the string before
   # calling this method to avoid wasting memory on hash keys.  Likewise
   # is true for any String objects in +refs+.
-  def add(mid, refs, msg)
+  #
+  # Adding a message could link 2 messages in Msgthr,
+  # by making one message a child of the other.
+  # It's possible to have a callback called when a child is added
+  # by passing a block to this method.
+  # This block can access the child and parent messages. E.g.
+  #
+  #   msgthr.add(0, nil, '0')
+  #   msgthr.add(1, [0], '1') do |parent, child|
+  #     puts "#{parent.mid} -> #{child.mid}"
+  #   end
+  def add(mid, refs, msg) # :yields: parent, child
     @state == :init or raise StateError, "cannot add when already #@state"
 
     cur = @id_table[mid] ||= Msgthr::Container.new(mid)
