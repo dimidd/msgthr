@@ -102,4 +102,46 @@ EOF
 EOF
     assert_equal exp, out
   end
+
+  def test_add_child_callback
+    thr = Msgthr.new
+    threads = {}
+    [1, 1.1, 1.2, 2, 2.1, 2.11].each{ |id| threads[id] = [id]}
+    my_add = lambda do |id, refs, msg|
+      thr.add(id, refs, msg) do |parent, child|
+        threads[child.mid] = threads[parent.mid]
+      end
+    end
+    # Create the following structure
+    # 1
+    #  \
+    #  | 1.1
+    #  \
+    #    1.2
+    # 2
+    #   \
+    #    2.1
+    #       \
+    #         2.1.1
+    my_add.call(1, nil, '1')
+    my_add.call(11, [1], '1.1')
+    my_add.call(12, [1], '1.2')
+    my_add.call(2, nil, '2')
+    my_add.call(21, [2], '2.1')
+    my_add.call(211, [21], '2.1.1')
+
+    thr.thread!
+    thr.rootset.each do |cnt|
+      threads[cnt.mid][0] = cnt.msg
+    end
+
+    assert_equal threads[1], threads[11]
+    assert_equal threads[1], threads[12]
+    assert_equal threads[2], threads[21]
+    assert_equal threads[2], threads[211]
+    assert_equal threads[21], threads[211]
+    assert_equal threads[1][0], '1'
+    assert_equal threads[2][0], '2'
+  end
+
 end
