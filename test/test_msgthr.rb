@@ -106,7 +106,7 @@ EOF
   def test_add_child_callback
     thr = Msgthr.new
     threads = {}
-    [1, 1.1, 1.2, 2, 2.1, 2.11].each{ |id| threads[id] = [id]}
+    [1, 11, 12, 2, 21, 211].each{ |id| threads[id] = [id]}
     my_add = lambda do |id, refs, msg|
       thr.add(id, refs, msg) do |parent, child|
         threads[child.mid] = threads[parent.mid]
