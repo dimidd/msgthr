@@ -144,4 +144,98 @@ EOF
     assert_equal threads[2][0], '2'
   end
 
+  # TODO: move to a separate file
+  # https://en.wikipedia.org/wiki/Tarjan%27s_off-line_lowest_common_ancestors_algorithm
+  class UnionNode
+    attr_accessor :id, :parent, :children, :rank, :ancestor
+
+    def initialize id
+      @id = id
+      @children = []
+    end
+
+    def make_set
+      self.parent = self
+      self.rank = 0
+    end
+
+    def union(y)
+      self_root = self.find[0]
+      y_root = y.find[0]
+      if self_root.rank > y_root.rank
+        y_root.parent = self_root
+      elsif self_root.rank < y_root.rank
+        self_root.parent = y_root
+      elsif self_root.rank == y_root.rank
+        y_root.parent = self_root
+        self_root.rank = self_root.rank + 1
+      end
+    end
+
+    # TODO: return dist as well
+    def find(dist = 0)
+      if self.parent != self
+        self.parent, dist = self.parent.find(dist + 1)
+      end
+      [self.parent, dist]
+    end
+
+    def self.tarjan(u)
+      u.make_set
+      u.ancestor = u
+      u.children.each do |v|
+        UnionNode.tarjan(v)
+        u.union(v)
+        found = u.find[0]
+        require 'pry'; binding.pry if found.class == Array
+        found.ancestor = u
+      end
+    end
+
+    def self.lca(u, v)
+      found, dist = v.find
+      [found.ancestor, dist]
+    end
+  end
+
+  def test_lca
+    lcas = {}
+    nodes = {}
+    thr = Msgthr.new
+    [0, 1, 11, 12, 2, 21, 211].each do |id|
+      nodes[id] = UnionNode.new id
+      nodes[id].make_set
+    end
+    my_add = lambda do |id, refs, msg|
+      thr.add(id, refs, msg) do |parent, child|
+        nodes[parent.mid].children << nodes[child.mid]
+      end
+    end
+    # Create the following structure
+    # 0
+    # \
+    # | 1
+    # |  \
+    # |  | 1.1
+    # |  \
+    # \   1.2
+    #   2
+    #     \
+    #      2.1
+    #         \
+    #           2.1.1
+    my_add.call(0, nil, '1')
+    my_add.call(1, [0], '1')
+    my_add.call(11, [1], '1.1')
+    my_add.call(12, [1], '1.2')
+    my_add.call(2, [0], '2')
+    my_add.call(21, [2], '2.1')
+    my_add.call(211, [21], '2.1.1')
+    thr.thread!
+
+    UnionNode.tarjan(nodes[0])
+    lca_11_211, dist = UnionNode.lca(nodes[11], nodes[211])
+    assert_equal 0, lca_11_211.id
+    assert_equal 2, dist
+  end
 end
